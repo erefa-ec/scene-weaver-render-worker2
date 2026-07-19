@@ -18,7 +18,21 @@ if (!SECRET || !SUPABASE_URL || !SERVICE_KEY) {
   console.error("Missing env: RENDER_WORKER_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
-const sb = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    global: {
+      headers: { 'x-client-info': 'render-worker' },
+    },
+    realtime: {
+      transport: ws
+    }
+  }
+)
 
 const app = Fastify({ logger: true });
 
